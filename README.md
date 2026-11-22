@@ -24,7 +24,7 @@ The pipeline runs on a schedule through GitHub Actions.
 - **Two-step scoring and review.** A single LLM call can produce a reasonable-sounding assessment that isn't grounded in the resume or posting. The review step catches weak output before it reaches the database.
 - **Smaller model for both steps.** Scoring and review use `gpt-4o-mini` to keep token usage low. A larger model uses more tokens per call, and for this task the output quality was close enough to justify the smaller one.
 - **Filter before scoring.** Title and location filters run first, so irrelevant postings never reach the LLM. This keeps token costs down.
-- **Configuration separate from logic.** Target titles, locations and company lists all live in `src/sources.py`. Retargeting to a different function or industry means editing that file.
+- **Targets in one place.** Target titles, excluded titles and company lists live in `src/sources.py`. Location rules and the resume path are set in the code, so they need editing too (see below).
 
 ## Status
 
@@ -33,6 +33,16 @@ The pipeline runs on a schedule through GitHub Actions.
 **Limited:** Workday coverage is one company (Eli Lilly, the only entry in `WORKDAY_COMPANIES`). Each new company needs its Workday server and tenant details found by hand, because no public directory maps companies to their Workday setup.
 
 **Not built yet:** choosing between multiple resume versions based on the posting, and an agent that suggests new companies to add.
+
+## Make it your own
+
+The resume in `data/resume.pdf` is an older version of mine, included as an example. To run the pipeline for yourself:
+
+1. **Resume.** Replace `data/resume.pdf` with your own PDF. The path is set in `RESUME_PATH` in `src/main.py`.
+2. **Target roles.** Edit `TARGET_TITLE_KEYWORDS` and `EXCLUDED_TITLE_SIGNALS` in `src/sources.py`. Keywords are case-insensitive substring matches, so check that a keyword doesn't match titles you don't want.
+3. **Companies.** Edit `GREENHOUSE_COMPANIES` and `LEVER_COMPANIES` in `src/sources.py`, using each company's board slug. Workday companies need a tenant, site and server, which are described in the `fetch_workday_postings` docstring.
+4. **Locations.** `EXCLUDED_LOCATIONS` and `is_us_or_remote()` in `src/sources.py` decide which postings are kept. Change them for a different country or to allow specific cities.
+5. **Accounts.** Create your own Postgres database (I use Neon) and an OpenAI API key. Set them in `.env` locally and as repository secrets for GitHub Actions. The tables are created automatically by `init_db()` in `src/db.py` the first time the pipeline runs.
 
 ## Run it locally
 
