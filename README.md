@@ -4,7 +4,7 @@ An automated pipeline that sources job postings, scores them against my resume, 
 
 **Live dashboard:** [bruno-job-search-agent.streamlit.app](https://bruno-job-search-agent.streamlit.app/)
 
-![Job Search Dashboard showing ranked postings with fit scores and matched skills](docs/dashboard.png)
+![Job Search Dashboard card showing a role overview, matched skills and gaps](docs/dashboard.png)
 
 ## How it works
 
@@ -18,6 +18,10 @@ Sourcing  ->  Scoring  ->  Review  ->  Postgres (Neon)  ->  Streamlit dashboard
 4. **Storage and dashboard.** Results go to Postgres. The Streamlit app filters by score or location and tracks which jobs I've applied to.
 
 The pipeline runs on a schedule through GitHub Actions.
+
+A run from the Actions log, where the review step flagged a scoring result and triggered a rerun:
+
+![Pipeline log showing the supervisor flagging a scoring result and rerunning it](docs/supervisor-rerun-log.png)
 
 ## Design decisions
 
@@ -75,6 +79,10 @@ streamlit run app.py
 Company sources are configured in `src/sources.py`. The current list has six companies: Agoda, Esri and Justworks (Greenhouse), Allegiant Air and Rover (Lever), and Eli Lilly (Workday).
 
 ## Automation setup
+
+Scheduled weekday runs in GitHub Actions:
+
+![GitHub Actions run history for the pipeline](docs/run-history.png)
 
 The workflow in `.github/workflows/run-pipeline.yml` runs weekdays at 13:00 UTC. Add two repository secrets under **Settings > Secrets and variables > Actions**: `OPENAI_API_KEY` and `DATABASE_URL`.
 
